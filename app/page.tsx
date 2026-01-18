@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 import Tesseract from "tesseract.js";
+import jsPDF from "jspdf";
+import { Document, Packer, Paragraph, TextRun } from "docx";
+import { saveAs } from "file-saver";
 import {
   getWordCount,
   getSentenceCount,
@@ -22,6 +25,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [status, setStatus] = useState<string>("");
   const [language, setLanguage] = useState<string>("eng");
+  const [downloadFormat, setDownloadFormat] = useState<string>("txt");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -34,7 +38,7 @@ export default function Home() {
     try {
       const result = await Tesseract.recognize(
         file,
-        language,
+        language, 
         {
           logger: (m) => {
             if (m.status === 'recognizing text') {
@@ -56,8 +60,8 @@ export default function Home() {
     }
   };
 
-  const handleDownload = () => {
-    if (!text) return;
+
+  const downloadTxt = () => {
     const element = document.createElement("a");
     const file = new Blob([text], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
@@ -65,6 +69,51 @@ export default function Home() {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+  };
+
+  const downloadPdf = () => {
+    const doc = new jsPDF();
+    const splitText = doc.splitTextToSize(text, 180); 
+    doc.text(splitText, 10, 10);
+    doc.save(`extracted_${language}.pdf`);
+  };
+
+  const downloadDocx = () => {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun(text),
+              ],
+            }),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `extracted_${language}.docx`);
+    });
+  };
+
+  const handleDownload = () => {
+    if (!text) return;
+
+    switch (downloadFormat) {
+      case "pdf":
+        downloadPdf();
+        break;
+      case "docx":
+        downloadDocx();
+        break;
+      case "txt":
+      default:
+        downloadTxt();
+        break;
+    }
   };
 
   return (
@@ -101,7 +150,7 @@ export default function Home() {
                 className={`p-16 bg-zinc-100 rounded-sm border border-dashed border-foreground/30 hover:bg-zinc-200 dark:bg-zinc-900 dark:border-foreground/60 dark:hover:bg-zinc-800 transition-colors ${isLoading ? "opacity-50 cursor-wait" : ""}`}
               >
                 {isLoading ? (
-                  <div className="flex flex-col items-center justify-center h-12 w-12">
+                  <div className="flex flex-col items-center justify-center h-[48px] w-[48px]">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
                   </div>
                 ) : (
@@ -132,7 +181,7 @@ export default function Home() {
             </div>
 
             <h1 className="max-w-sm md:text-lg text-xs font-light leading-tight text-black dark:text-zinc-50">
-              Upload an image containing text in your chosen language. Ensure the text is clear and readable.
+              Upload an image containing text in your chosen language.
             </h1>
           </div>
 
@@ -144,13 +193,26 @@ export default function Home() {
               value={getTextArea(text)}
             >
             </textarea>
-            <button 
-              onClick={handleDownload}
-              disabled={!text}
-              className={`h-12 rounded-sm border border-solid border-black/8 md:px-5 px-8 transition-colors md:w-40 ${!text ? "opacity-50 cursor-not-allowed" : "hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"}`}
-            >
-              Download
-            </button>
+            
+            <div className="flex gap-2">
+               <select
+                value={downloadFormat}
+                onChange={(e) => setDownloadFormat(e.target.value)}
+                className="h-12 w-1/3 p-2 rounded-sm border border-foreground/30 bg-white dark:bg-zinc-900 text-foreground text-sm focus:outline-none"
+              >
+                <option value="txt">.txt</option>
+                <option value="docx">.docx</option>
+                <option value="pdf">.pdf</option>
+              </select>
+
+              <button 
+                onClick={handleDownload}
+                disabled={!text}
+                className={`h-12 w-2/3 rounded-sm border border-solid border-black/8 px-4 transition-colors ${!text ? "opacity-50 cursor-not-allowed" : "hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"}`}
+              >
+                Download File
+              </button>
+            </div>
           </div>
 
         </div>
