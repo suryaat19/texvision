@@ -150,7 +150,7 @@ export default function Home() {
                 className={`p-16 bg-zinc-100 rounded-sm border border-dashed border-foreground/30 hover:bg-zinc-200 dark:bg-zinc-900 dark:border-foreground/60 dark:hover:bg-zinc-800 transition-colors ${isLoading ? "opacity-50 cursor-wait" : ""}`}
               >
                 {isLoading ? (
-                  <div className="flex flex-col items-center justify-center h-[48px] w-[48px]">
+                  <div className="flex flex-col items-center justify-center h-12 w-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
                   </div>
                 ) : (
