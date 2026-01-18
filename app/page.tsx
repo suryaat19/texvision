@@ -9,10 +9,19 @@ import {
   getTextArea,
 } from "./utils/stats";
 
+const LANGUAGES = [
+  { code: 'eng', label: 'English' },
+  { code: 'hin', label: 'Hindi (हिंदी)' },
+  { code: 'mar', label: 'Marathi (मराठी)' },
+  { code: 'tam', label: 'Tamil (தமிழ்)' },
+  { code: 'tel', label: 'Telugu (తెలుగు)' },
+];
+
 export default function Home() {
   const [text, setText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [status, setStatus] = useState<string>("");
+  const [language, setLanguage] = useState<string>("eng");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -20,23 +29,23 @@ export default function Home() {
 
     setIsLoading(true);
     setStatus("Initializing...");
-    setText("");
+    setText(""); 
 
     try {
       const result = await Tesseract.recognize(
         file,
-        'eng',
+        language,
         {
           logger: (m) => {
             if (m.status === 'recognizing text') {
               setStatus(`Processing: ${Math.round(m.progress * 100)}%`);
             } else {
-              setStatus(m.status);
+              setStatus(m.status.replace(/_/g, " ")); 
             }
           },
         }
       );
-
+      
       setText(result.data.text);
       setStatus("Done!");
     } catch (err) {
@@ -52,7 +61,7 @@ export default function Home() {
     const element = document.createElement("a");
     const file = new Blob([text], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
-    element.download = "extracted_text.txt";
+    element.download = `extracted_${language}.txt`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -61,11 +70,31 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-5xl flex-col items-center justify-between py-8 md:py-16 md:px-16 px-4 bg-white dark:bg-black sm:items-start">
-        <div className="uppercase text-2xl font-ibm-sans font-bold tracking-wide text-foreground dark:text-background">
+        <div className="uppercase text-2xl font-ibm-sans font-bold tracking-wide text-foreground dark:text-background mb-8">
           <span className="-tracking-widest">tex</span>vision
         </div>
+        
         <div className="grid-cols-1 md:grid-cols-2 grid gap-4 md:gap-32 w-full">
-          <div className="flex flex-col items-center gap-6 text-center sm:items-start justify-around sm:text-left">
+          <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+            
+            <div className="w-full max-w-50">
+              <label className="text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1.5 block">
+                Select Language
+              </label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                disabled={isLoading}
+                className="w-full p-2 rounded-sm border border-foreground/30 bg-white dark:bg-zinc-900 text-foreground text-sm focus:outline-none focus:border-foreground"
+              >
+                {LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="relative group">
               <button
                 type="button"
@@ -97,18 +126,16 @@ export default function Home() {
                 onChange={handleImageUpload}
               />
             </div>
-
+            
             <div className="h-6">
-              {status && <p className="text-sm font-medium text-foreground/70 animate-pulse">{status}</p>}
+              {status && <p className="text-sm font-medium text-foreground/70 animate-pulse capitalize">{status}</p>}
             </div>
 
             <h1 className="max-w-sm md:text-lg text-xs font-light leading-tight text-black dark:text-zinc-50">
-              To get started, upload an image containing minimum 20 lines of text of your mother tongue with five different fonts.
+              Upload an image containing text in your chosen language. Ensure the text is clear and readable.
             </h1>
-
           </div>
 
-          
           <div className="flex flex-col gap-6">
             <textarea
               readOnly
@@ -117,7 +144,7 @@ export default function Home() {
               value={getTextArea(text)}
             >
             </textarea>
-            <button
+            <button 
               onClick={handleDownload}
               disabled={!text}
               className={`h-12 rounded-sm border border-solid border-black/8 md:px-5 px-8 transition-colors md:w-40 ${!text ? "opacity-50 cursor-not-allowed" : "hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"}`}
