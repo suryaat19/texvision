@@ -33,23 +33,23 @@ export default function Home() {
 
     setIsLoading(true);
     setStatus("Initializing...");
-    setText(""); 
+    setText("");
 
     try {
       const result = await Tesseract.recognize(
         file,
-        language, 
+        language,
         {
           logger: (m) => {
             if (m.status === 'recognizing text') {
               setStatus(`Processing: ${Math.round(m.progress * 100)}%`);
             } else {
-              setStatus(m.status.replace(/_/g, " ")); 
+              setStatus(m.status.replace(/_/g, " "));
             }
           },
         }
       );
-      
+
       setText(result.data.text);
       setStatus("Done!");
     } catch (err) {
@@ -73,7 +73,7 @@ export default function Home() {
 
   const downloadPdf = () => {
     const doc = new jsPDF();
-    const splitText = doc.splitTextToSize(text, 180); 
+    const splitText = doc.splitTextToSize(text, 180);
     doc.text(splitText, 10, 10);
     doc.save(`extracted_${language}.pdf`);
   };
@@ -119,15 +119,15 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-5xl flex-col items-center justify-between py-8 md:py-16 md:px-16 px-4 bg-white dark:bg-black sm:items-start">
-        <div className="uppercase text-2xl font-ibm-sans font-bold tracking-wide text-foreground dark:text-background mb-8">
+        <div className="uppercase text-2xl font-ibm-sans font-bold tracking-wide text-foreground dark:text-white mb-8">
           <span className="-tracking-widest">tex</span>vision
         </div>
-        
+
         <div className="grid-cols-1 md:grid-cols-2 grid gap-4 md:gap-32 w-full">
-          <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-            
+          <div className="hidden md:flex flex-col items-center gap-6 text-center items-start text-left">
+
             <div className="w-full max-w-50">
-              <label className="text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1.5 block">
+              <label className="text-xs font-semibold uppercase tracking-wider text-foreground/50 dark:text-foreground/70 mb-1.5 block">
                 Select Language
               </label>
               <select
@@ -175,7 +175,7 @@ export default function Home() {
                 onChange={handleImageUpload}
               />
             </div>
-            
+
             <div className="h-6">
               {status && <p className="text-sm font-medium text-foreground/70 animate-pulse capitalize">{status}</p>}
             </div>
@@ -183,6 +183,68 @@ export default function Home() {
             <h1 className="max-w-sm md:text-lg text-xs font-light leading-tight text-black dark:text-zinc-50">
               Upload an image containing text in your chosen language.
             </h1>
+          </div>
+
+          <div className="md:hidden flex flex-col items-center gap-6 text-center">
+            <div className="w-full max-w-50 flex justify-between items-center gap-4">
+              <label className="text-xs font-semibold uppercase tracking-wider text-foreground/50 dark:text-foreground/70 mb-1.5 block">
+                Select Language
+              </label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                disabled={isLoading}
+                className="w-full p-2 rounded-sm border border-foreground/30 bg-white dark:bg-zinc-900 text-foreground text-sm focus:outline-none focus:border-foreground"
+              >
+                {LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-between items-center gap-6">
+              <div className="relative group">
+                <button
+                  type="button"
+                  className={`p-16 bg-zinc-100 rounded-sm border border-dashed border-foreground/30 hover:bg-zinc-200 dark:bg-zinc-900 dark:border-foreground/60 dark:hover:bg-zinc-800 transition-colors ${isLoading ? "opacity-50 cursor-wait" : ""}`}
+                >
+                  {isLoading ? (
+                    <div className="flex flex-col items-center justify-center h-12 w-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
+                    </div>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="48px"
+                      viewBox="0 -960 960 960"
+                      width="48px"
+                      fill="currentColor"
+                      className="text-foreground"
+                    >
+                      <path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+                    </svg>
+                  )}
+                </button>
+
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg"
+                  disabled={isLoading}
+                  className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                  onChange={handleImageUpload}
+                />
+              </div>
+              <div className="flex flex-col">
+                <div className="h-6">
+                  {status && <p className="text-sm font-medium text-foreground/70 animate-pulse capitalize">{status}</p>}
+                </div>
+
+                <h1 className="max-w-sm text-sm font-light leading-tight text-black dark:text-zinc-50">
+                  Upload an image containing text in your chosen language.
+                </h1>
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -193,9 +255,9 @@ export default function Home() {
               value={getTextArea(text)}
             >
             </textarea>
-            
+
             <div className="flex gap-2">
-               <select
+              <select
                 value={downloadFormat}
                 onChange={(e) => setDownloadFormat(e.target.value)}
                 className="h-12 w-1/3 p-2 rounded-sm border border-foreground/30 bg-white dark:bg-zinc-900 text-foreground text-sm focus:outline-none"
@@ -205,7 +267,7 @@ export default function Home() {
                 <option value="pdf">.pdf</option>
               </select>
 
-              <button 
+              <button
                 onClick={handleDownload}
                 disabled={!text}
                 className={`h-12 w-2/3 rounded-sm border border-solid border-black/8 px-4 transition-colors ${!text ? "opacity-50 cursor-not-allowed" : "hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"}`}
@@ -218,7 +280,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col gap-4 text-base font-medium mt-8 w-full">
-          <table className="text-sm text-foreground/60 w-full md:w-auto">
+          <table className="text-sm text-foreground/60 w-full overflow-x-auto md:w-auto">
             <tbody>
               <tr>
                 <th className="pr-8 text-left py-2">No. of Words</th>
