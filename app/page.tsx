@@ -124,7 +124,7 @@ export default function Home() {
         </div>
 
         <div className="grid-cols-1 md:grid-cols-2 grid gap-4 md:gap-32 w-full">
-          <div className="hidden md:flex flex-col items-center gap-6 text-center items-start text-left">
+          <div className="hidden md:flex flex-col gap-6 items-start text-left">
 
             <div className="w-full max-w-50">
               <label className="text-xs font-semibold uppercase tracking-wider text-foreground/50 dark:text-foreground/70 mb-1.5 block">
@@ -134,7 +134,7 @@ export default function Home() {
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
                 disabled={isLoading}
-                className="w-full p-2 rounded-sm border border-foreground/30 bg-white dark:bg-zinc-900 text-foreground text-sm focus:outline-none focus:border-foreground"
+                className="w-full p-2 rounded-sm bg-zinc-100 dark:bg-zinc-900 text-foreground text-sm focus:outline-none focus:border-foreground"
               >
                 {LANGUAGES.map((lang) => (
                   <option key={lang.code} value={lang.code}>
@@ -251,26 +251,26 @@ export default function Home() {
             <textarea
               readOnly
               placeholder="Extracted text will appear here..."
-              className="h-84 w-full resize-none rounded-sm border border-foreground/30 bg-zinc-100 p-4 text-sm leading-relaxed text-foreground dark:bg-zinc-900 dark:border-foreground/60 dark:text-foreground focus:outline-none"
+              className="h-84 w-full resize-none rounded-xl bg-zinc-50 p-4 text-sm leading-relaxed text-foreground dark:bg-zinc-900 dark:border-foreground/60 dark:text-foreground focus:outline-none"
               value={getTextArea(text)}
             >
             </textarea>
 
-            <div className="flex gap-2">
+            <div className="flex items-center justify-around">
               <select
                 value={downloadFormat}
                 onChange={(e) => setDownloadFormat(e.target.value)}
-                className="h-12 w-1/3 p-2 rounded-sm border border-foreground/30 bg-white dark:bg-zinc-900 text-foreground text-sm focus:outline-none"
+                className="px-4 py-2.5 rounded-xl bg-zinc-200 dark:bg-zinc-900 text-foreground text-sm focus:outline-none"
               >
-                <option value="txt">.txt</option>
-                <option value="docx">.docx</option>
-                <option value="pdf">.pdf</option>
+                <option value="txt">txt</option>
+                <option value="docx">docx</option>
+                <option value="pdf">pdf</option>
               </select>
 
               <button
                 onClick={handleDownload}
                 disabled={!text}
-                className={`h-12 w-2/3 rounded-sm border border-solid border-black/8 px-4 transition-colors ${!text ? "opacity-50 cursor-not-allowed" : "hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"}`}
+                className={`rounded-xl bg-black text-sm dark:bg-white text-white dark:text-black px-4 py-2 font-bold transition-colors ${!text ? "cursor-not-allowed" : "hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"}`}
               >
                 Download File
               </button>
@@ -279,25 +279,36 @@ export default function Home() {
 
         </div>
 
-        <div className="flex flex-col gap-4 text-base font-medium mt-8 w-full">
-          <table className="text-sm text-foreground/60 w-full overflow-x-auto md:w-auto">
-            <tbody>
-              <tr>
-                <th className="pr-8 text-left py-2">No. of Words</th>
-                <th className="pr-8 text-left py-2">No. of Sentences</th>
-                <th className="pr-8 text-left py-2">No. of Characters</th>
-                <th className="pr-8 text-left py-2">Average Word Length</th>
-              </tr>
-              <tr>
-                <td className="text-left font-bold text-foreground text-lg">{getWordCount(text)}</td>
-                <td className="text-left font-bold text-foreground text-lg">{getSentenceCount(text)}</td>
-                <td className="text-left font-bold text-foreground text-lg">{getCharacterCount(text)}</td>
-                <td className="text-left font-bold text-foreground text-lg">
-                  {getAverageWordLength(text) > 0 ? getAverageWordLength(text).toFixed(2) : 0}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="mt-8 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/50">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="border-b border-zinc-200 bg-zinc-50/80 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                <tr>
+                  <th className="pl-6 py-4 font-medium tracking-wide">No. of Words</th>
+                  <th className="pl-6 py-4 font-medium tracking-wide">No. of Sentences</th>
+                  <th className="pl-6 py-4 font-medium tracking-wide">No. of Characters</th>
+                  <th className="pl-6 py-4 font-medium tracking-wide">Average Word Length</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="px-6 py-3 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+                    {getWordCount(text)}
+                  </td>
+                  <td className="px-6 py-3 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+                    {getSentenceCount(text)}
+                  </td>
+                  <td className="px-6 py-3 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+                    {getCharacterCount(text)}
+                  </td>
+                  <td className="px-6 py-3 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+                    {getAverageWordLength(text) > 0 ? getAverageWordLength(text).toFixed(2) : "0"}
+                  </td>
+                </tr>
+              </tbody>
+
+            </table>
+          </div>
         </div>
       </main>
     </div>
