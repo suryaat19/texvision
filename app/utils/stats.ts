@@ -29,7 +29,7 @@ export function getTextArea(text: string): string {
   if (!text) return "";
 
   return text
-    .replace(/\r\n/g, "\n")      // normalize line breaks
-    .replace(/\n{3,}/g, "\n\n")  // remove excessive empty lines
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
